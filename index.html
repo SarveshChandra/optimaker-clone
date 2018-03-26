@@ -1,0 +1,390 @@
+<html>
+<head>
+	<script src="https://cdn.jsdelivr.net/npm/d3@4.10.2/build/d3.min.js"></script>
+	<!--<script src="https://cdn.jsdelivr.net/npm/d3-curve-editor@0.2.0/build/d3-curve-editor.min.js"></script>-->
+	<script src="d3ce.js"></script>
+	<link  href="https://cdn.jsdelivr.net/npm/d3-curve-editor@0.2.0/build/d3-curve-editor.css" rel="stylesheet" type="text/css"></link>
+	<style>
+		html,body{
+		  height: 95%;
+		  margin: 0;
+		  padding: 0;
+		}
+		#editor{
+		  width: 100%;
+		  height: 100%;
+		}
+	</style>
+</head>
+<body>
+	Lines data in console.
+	<svg tabindex="1" id="editor"></svg>
+	<script>
+		var lines = [];
+		var process = true;
+		var processHandle = true;
+		
+		//base line
+		lines.push(new D3CE.Line("#47a",[
+			new D3CE.CurvePoint(0.00,0.7).isFixed(true),
+			new D3CE.CurvePoint(0.46,0.7).isFixed(true),
+			new D3CE.CurvePoint(0.54,0.7).isFixed(true),
+			new D3CE.CurvePoint(1.00,0.7).isFixed(true)
+		],100,"base"));
+
+		//first lens
+		lines.push(new D3CE.Line("#47a",[
+			new D3CE.CurvePoint(0.05,0.7).isFixed(true),
+			new D3CE.CurvePoint(0.10,0.5),
+			new D3CE.CurvePoint(0.40,0.5),
+			new D3CE.CurvePoint(0.45,0.7).isFixed(true)
+		],100,"leftlens"));
+
+		//second lens
+		lines.push(new D3CE.Line("#47a",[
+			new D3CE.CurvePoint(0.55,0.7).isFixed(true),
+			new D3CE.CurvePoint(0.60,0.5),
+			new D3CE.CurvePoint(0.90,0.5),
+			new D3CE.CurvePoint(0.95,0.7).isFixed(true)
+		],100,"rightlens"));
+
+		//left handle
+		lines.push(new D3CE.Line("#222222",[
+			new D3CE.CurvePoint(-0.1,0.8).isFixed(true),
+			new D3CE.CurvePoint(0.0,0.9).isFixed(true),
+			new D3CE.CurvePoint(0.45,0.9).isFixed(true)
+		],100,"lefthandle"));
+
+		//right handle
+		lines.push(new D3CE.Line("#222222",[
+			new D3CE.CurvePoint(0.55,0.9).isFixed(true),
+			new D3CE.CurvePoint(1.0,0.9).isFixed(true),
+			new D3CE.CurvePoint(1.1,0.8).isFixed(true)
+		],100,"righthandle"));
+
+		var container = document.getElementById("editor");
+		var editor = new D3CE.CurveEditor(container,lines,{curve: d3.curveCatmullRom});
+		//var mouse = d3.mouse(editor.view.node());
+
+
+		editor.eventListener.on('change add remove',()=>{
+			editor.view.update();
+		})
+
+
+		editor.eventListener.on('add', ()=> {
+			var position = editor.active.line.points.indexOf(editor.active.point);
+			var x = editor.view.getCoordinate(editor.active.point,0);
+			var y = editor.view.getCoordinate(editor.active.point,1);
+
+			if((editor.active.line.name == "base") && (x !== 0.50) && process) {
+				process = false;
+				var activeLine = editor.active.line;
+				var activePoint = editor.active.point;
+				var newPosition = 0;
+				if(x>0.50) {
+					x = x - 0.50;
+					x = 0.50 - x;
+					newPosition = ((editor.active.line.points.length-1) - position);
+				}
+				else {
+					x = 0.50 - x;
+					x = 0.50 + x;
+					newPosition = editor.active.line.points.length - position;
+				}
+
+				editor.addPoint(new D3CE.CurvePoint(x,y), newPosition);
+				editor.active.line = activeLine;
+				editor.active.point = activePoint;
+			}
+
+			if(editor.active.line.name == "leftlens" && process) {
+				process = false;
+				var activeLine = editor.active.line;
+				var activePoint = editor.active.point;
+				x = 0.50 - x;
+				x = 0.50 + x;
+
+				for(var i=0; i<lines.length; i++) {
+					if(lines[i].name == "rightlens") {
+						editor.active.line = lines[i];
+						editor.addPoint(new D3CE.CurvePoint(x,y), editor.active.line.points.length - position);
+						editor.active.line = activeLine;
+						editor.active.point = activePoint;
+					}
+				}			
+			}
+
+			if(editor.active.line.name == "rightlens" && process) {
+				process = false;
+				var activeLine = editor.active.line;
+				var activePoint = editor.active.point;
+				x = x - 0.50;
+				x = 0.50 - x;
+
+				for(var j=0; j<lines.length; j++) {
+					if(lines[j].name == "leftlens") {
+						editor.active.line = lines[j];
+						editor.addPoint(new D3CE.CurvePoint(x,y), editor.active.line.points.length - position);
+						editor.active.line = activeLine;
+						editor.active.point = activePoint;
+					}
+				}
+			}
+			else {
+				process = true;
+			}
+
+			if(editor.active.line.name == "lefthandle" && processHandle) {
+				processHandle = false;
+				var activeLine = editor.active.line;
+				var activePoint = editor.active.point;
+				x = 0.50 - x;
+				x = 0.50 + x;
+
+				for(var i=0; i<lines.length; i++) {
+					if(lines[i].name == "righthandle") {
+						editor.active.line = lines[i];
+						editor.addPoint(new D3CE.CurvePoint(x,y), editor.active.line.points.length - position);
+						editor.active.line = activeLine;
+						editor.active.point = activePoint;
+					}
+				}			
+			}
+
+			if(editor.active.line.name == "righthandle" && processHandle) {
+				processHandle = false;
+				var activeLine = editor.active.line;
+				var activePoint = editor.active.point;
+				x = x - 0.50;
+				x = 0.50 - x;
+
+				for(var j=0; j<lines.length; j++) {
+					if(lines[j].name == "lefthandle") {
+						editor.active.line = lines[j];
+						editor.addPoint(new D3CE.CurvePoint(x,y), editor.active.line.points.length - position);
+						editor.active.line = activeLine;
+						editor.active.point = activePoint;
+					}
+				}
+			}
+			else {
+				processHandle = true;
+			}
+
+			editor.view.update();
+		})
+
+
+		editor.eventListener.on('remove', ()=> {
+
+			if((editor.active.line.name == "base") && process) {
+				process = false;
+				var activeLine = editor.active.line;
+				//var activePoint = editor.active.point;
+				var removePosition = 0;
+				removePosition = ((editor.active.line.points.length - 1) - editor.removedPointPosition);
+				if(removePosition < ((editor.active.line.points.length + 1)/2)) {
+					++removePosition;
+				}
+
+				editor.removePoint(editor.active.line.points[removePosition]);
+				editor.active.line = activeLine;
+				//editor.active.point = activePoint;
+			}
+
+			if(editor.active.line.name == "leftlens" && process) {
+				process = false;
+				var activeLine = editor.active.line;
+				//var activePoint = editor.active.point;
+				var removePosition = 0;
+				removePosition = editor.active.line.points.length - editor.removedPointPosition;
+
+				for(var i=0; i<lines.length; i++) {
+					if(lines[i].name == "rightlens") {
+						editor.active.line = lines[i];
+						editor.removePoint(editor.active.line.points[removePosition]);
+						editor.active.line = activeLine;
+						//editor.active.point = activePoint;
+					}
+				}			
+			}
+
+			if(editor.active.line.name == "rightlens" && process) {
+				process = false;
+				var activeLine = editor.active.line;
+				//var activePoint = editor.active.point;
+				var removePosition = 0;
+				removePosition = editor.active.line.points.length - editor.removedPointPosition;
+
+				for(var j=0; j<lines.length; j++) {
+					if(lines[j].name == "leftlens") {
+						editor.active.line = lines[j];
+						editor.removePoint(editor.active.line.points[removePosition]);
+						editor.active.line = activeLine;
+						//editor.active.point = activePoint;
+					}
+				}
+			}
+			else {
+				process = true;
+			}
+
+			if(editor.active.line.name == "lefthandle" && processHandle) {
+				processHandle = false;
+				var activeLine = editor.active.line;
+				//var activePoint = editor.active.point;
+				var removePosition = 0;
+				removePosition = editor.active.line.points.length - editor.removedPointPosition;
+
+				for(var i=0; i<lines.length; i++) {
+					if(lines[i].name == "righthandle") {
+						editor.active.line = lines[i];
+						editor.removePoint(editor.active.line.points[removePosition]);
+						editor.active.line = activeLine;
+						//editor.active.point = activePoint;
+					}
+				}			
+			}
+
+			if(editor.active.line.name == "righthandle" && processHandle) {
+				processHandle = false;
+				var activeLine = editor.active.line;
+				//var activePoint = editor.active.point;
+				var removePosition = 0;
+				removePosition = editor.active.line.points.length - editor.removedPointPosition;
+
+				for(var j=0; j<lines.length; j++) {
+					if(lines[j].name == "lefthandle") {
+						editor.active.line = lines[j];
+						editor.removePoint(editor.active.line.points[removePosition]);
+						editor.active.line = activeLine;
+						//editor.active.point = activePoint;
+					}
+				}
+			}
+			else {
+				processHandle = true;
+			}
+
+			editor.view.update();
+		})
+
+
+		editor.eventListener.on('change', ()=> {
+			var position = editor.active.line.points.indexOf(editor.active.point);
+			var x = editor.view.getCoordinate(editor.active.point,0);
+			var y = editor.view.getCoordinate(editor.active.point,1);
+			//console.log("change position is " + position);
+			console.log("x is " + x);
+			console.log("y is " + y);
+
+			if((editor.active.line.name == "base") && (x !== 0.50) && process) {
+				process = false;
+				var secondPosition = 0;
+				if(x>0.50) {
+					x = x - 0.50;
+					x = 0.50 - x;
+					secondPosition = ((editor.active.line.points.length-1) - position);
+				}
+				else {
+					x = 0.50 - x;
+					x = 0.50 + x;
+					secondPosition = ((editor.active.line.points.length - 1) - position);
+				}
+
+				editor.view.setCoordinate(editor.active.line.points[secondPosition], 0, x);
+            			editor.view.setCoordinate(editor.active.line.points[secondPosition], 1, y);
+			}
+
+			if(editor.active.line.name == "leftlens" && process) {
+				process = false;
+				var activeLine = editor.active.line;
+				var activePoint = editor.active.point;
+				x = 0.50 - x;
+				x = 0.50 + x;
+				var secondPosition = editor.active.line.points.length - position - 1;
+
+				for(var i=0; i<lines.length; i++) {
+					if(lines[i].name == "rightlens") {
+						editor.active.line = lines[i];
+						editor.view.setCoordinate(editor.active.line.points[secondPosition], 0, x);
+            					editor.view.setCoordinate(editor.active.line.points[secondPosition], 1, y);
+						editor.active.line = activeLine;
+						editor.active.point = activePoint;
+					}
+				}			
+			}
+
+			if(editor.active.line.name == "rightlens" && process) {
+				process = false;
+				var activeLine = editor.active.line;
+				var activePoint = editor.active.point;
+				x = x - 0.50;
+				x = 0.50 - x;
+				var secondPosition = editor.active.line.points.length - position - 1;
+
+				for(var j=0; j<lines.length; j++) {
+					if(lines[j].name == "leftlens") {
+						editor.active.line = lines[j];
+						editor.view.setCoordinate(editor.active.line.points[secondPosition], 0, x);
+            					editor.view.setCoordinate(editor.active.line.points[secondPosition], 1, y);
+						editor.active.line = activeLine;
+						editor.active.point = activePoint;
+					}
+				}
+			}
+			else {
+				process = true;
+			}
+
+			if(editor.active.line.name == "lefthandle" && processHandle) {
+				processHandle = false;
+				var activeLine = editor.active.line;
+				var activePoint = editor.active.point;
+				x = 0.50 - x;
+				x = 0.50 + x;
+				var secondPosition = editor.active.line.points.length - position - 1;
+
+				for(var i=0; i<lines.length; i++) {
+					if(lines[i].name == "righthandle") {
+						editor.active.line = lines[i];
+						editor.view.setCoordinate(editor.active.line.points[secondPosition], 0, x);
+            					editor.view.setCoordinate(editor.active.line.points[secondPosition], 1, y);
+						editor.active.line = activeLine;
+						editor.active.point = activePoint;
+					}
+				}
+			}
+
+			if(editor.active.line.name == "righthandle" && processHandle) {
+				processHandle = false;
+				var activeLine = editor.active.line;
+				var activePoint = editor.active.point;
+				x = x - 0.50;
+				x = 0.50 - x;
+				var secondPosition = editor.active.line.points.length - position - 1;
+
+				for(var j=0; j<lines.length; j++) {
+					if(lines[j].name == "lefthandle") {
+						editor.active.line = lines[j];
+						editor.view.setCoordinate(editor.active.line.points[secondPosition], 0, x);
+            					editor.view.setCoordinate(editor.active.line.points[secondPosition], 1, y);
+						editor.active.line = activeLine;
+						editor.active.point = activePoint;
+					}
+				}
+			}
+			else {
+				processHandle = true;
+			}
+
+			editor.view.update();
+		})
+
+
+		console.log("Lines");
+		console.log(lines);
+	</script>
+</body>
+</html>
