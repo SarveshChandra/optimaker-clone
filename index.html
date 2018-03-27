@@ -14,11 +14,21 @@
 		  width: 100%;
 		  height: 100%;
 		}
+		.curve-editor .point.fixed {
+			stroke-width: 0px;
+
+		}
+		.curve-editor .point {
+			stroke: blue;
+			stroke-width: 3px;
+
+		}
 	</style>
 </head>
 <body>
-	Lines data in console.
 	<svg tabindex="1" id="editor"></svg>
+	<br><br>
+	Lines data in console. <a onclick="reset()" style="border:1px solid #00b0ff; padding: 5px">Reset</a>
 	<script>
 		var lines = [];
 		var process = true;
@@ -26,40 +36,40 @@
 		
 		//base line
 		lines.push(new D3CE.Line("#47a",[
-			new D3CE.CurvePoint(0.00,0.7).isFixed(true),
-			new D3CE.CurvePoint(0.46,0.7).isFixed(true),
-			new D3CE.CurvePoint(0.54,0.7).isFixed(true),
-			new D3CE.CurvePoint(1.00,0.7).isFixed(true)
+			new D3CE.CurvePoint(0.00,0.6).isFixed(true),
+			new D3CE.CurvePoint(0.45,0.6).isFixed(true),
+			new D3CE.CurvePoint(0.55,0.6).isFixed(true),
+			new D3CE.CurvePoint(1.00,0.6).isFixed(true)
 		],100,"base"));
 
 		//first lens
 		lines.push(new D3CE.Line("#47a",[
-			new D3CE.CurvePoint(0.05,0.7).isFixed(true),
-			new D3CE.CurvePoint(0.10,0.5),
-			new D3CE.CurvePoint(0.40,0.5),
-			new D3CE.CurvePoint(0.45,0.7).isFixed(true)
+			new D3CE.CurvePoint(0.05,0.595).isFixed(true),
+			new D3CE.CurvePoint(0.10,0.4),
+			new D3CE.CurvePoint(0.40,0.4),
+			new D3CE.CurvePoint(0.45,0.59).isFixed(true)
 		],100,"leftlens"));
 
 		//second lens
 		lines.push(new D3CE.Line("#47a",[
-			new D3CE.CurvePoint(0.55,0.7).isFixed(true),
-			new D3CE.CurvePoint(0.60,0.5),
-			new D3CE.CurvePoint(0.90,0.5),
-			new D3CE.CurvePoint(0.95,0.7).isFixed(true)
+			new D3CE.CurvePoint(0.55,0.59).isFixed(true),
+			new D3CE.CurvePoint(0.60,0.4),
+			new D3CE.CurvePoint(0.90,0.4),
+			new D3CE.CurvePoint(0.95,0.595).isFixed(true)
 		],100,"rightlens"));
 
 		//left handle
 		lines.push(new D3CE.Line("#222222",[
-			new D3CE.CurvePoint(-0.1,0.8).isFixed(true),
-			new D3CE.CurvePoint(0.0,0.9).isFixed(true),
-			new D3CE.CurvePoint(0.45,0.9).isFixed(true)
+			new D3CE.CurvePoint(-0.1,0.7).isFixed(true),
+			new D3CE.CurvePoint(0.0,0.8).isFixed(true),
+			new D3CE.CurvePoint(0.45,0.8).isFixed(true)
 		],100,"lefthandle"));
 
 		//right handle
 		lines.push(new D3CE.Line("#222222",[
-			new D3CE.CurvePoint(0.55,0.9).isFixed(true),
-			new D3CE.CurvePoint(1.0,0.9).isFixed(true),
-			new D3CE.CurvePoint(1.1,0.8).isFixed(true)
+			new D3CE.CurvePoint(0.55,0.8).isFixed(true),
+			new D3CE.CurvePoint(1.0,0.8).isFixed(true),
+			new D3CE.CurvePoint(1.1,0.7).isFixed(true)
 		],100,"righthandle"));
 
 		var container = document.getElementById("editor");
@@ -67,9 +77,13 @@
 		//var mouse = d3.mouse(editor.view.node());
 
 
-		editor.eventListener.on('change add remove',()=>{
+		/*editor.eventListener.on('change add remove',()=>{
 			editor.view.update();
-		})
+		})*/
+
+		function reset() {
+			window.location.reload();
+		}
 
 
 		editor.eventListener.on('add', ()=> {

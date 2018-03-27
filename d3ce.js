@@ -86,7 +86,7 @@ var CurvePoint = function () {
         classCallCheck(this, CurvePoint);
 	
 	    //changed
-        this.radius = 8;
+        this.radius = 7;
         this.fixed = false;
         this.x = x;
         this.y = y;
@@ -132,7 +132,8 @@ var EditorView = function () {
 
         this.view = this.container.append('g');
 
-        this.zoom = d3.zoom().scaleExtent([0.5, 2]).on('zoom', function () {
+        //changed [0.5, 2.0] to [0.5, 0.5]
+        this.zoom = d3.zoom().scaleExtent([0.5, 0.5]).on('zoom', function () {
             _this.view.attr('transform', d3.event.transform);
             _this.gX.call(_this.xAxis.scale(d3.event.transform.rescaleX(_this.x)));
             _this.gY.call(_this.yAxis.scale(d3.event.transform.rescaleY(_this.y)));
