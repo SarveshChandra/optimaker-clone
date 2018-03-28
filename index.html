@@ -3,10 +3,11 @@
 	<script src="https://cdn.jsdelivr.net/npm/d3@4.10.2/build/d3.min.js"></script>
 	<!--<script src="https://cdn.jsdelivr.net/npm/d3-curve-editor@0.2.0/build/d3-curve-editor.min.js"></script>-->
 	<script src="d3ce.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 	<link  href="https://cdn.jsdelivr.net/npm/d3-curve-editor@0.2.0/build/d3-curve-editor.css" rel="stylesheet" type="text/css"></link>
 	<style>
 		html,body{
-		  height: 95%;
+		  height: 100%;
 		  margin: 0;
 		  padding: 0;
 		}
@@ -21,14 +22,32 @@
 		.curve-editor .point {
 			stroke: blue;
 			stroke-width: 3px;
-
+		}
+		a:hover {
+			background: #00b0ff;
+			color: #ffffff !important;
+		}
+		a:link {
+			text-decoration: none;
 		}
 	</style>
 </head>
 <body>
 	<svg tabindex="1" id="editor"></svg>
-	<br><br>
-	Lines data in console. <a onclick="reset()" style="border:1px solid #00b0ff; padding: 5px">Reset</a>
+	<div style="text-align: center; margin-top: -100px;">
+		<a onclick="reset()" href="" style="border:1px solid #00b0ff; padding: 10px 20px; color: #00b0ff">Reset</a>
+	</div>
+	
+	<ul class='custom-menu' id="container-menu">
+		<li data-action="save1">Save In Browser</li>
+		<li data-action="load1">Load from Browser</li>
+		<li data-action="save2">Save As File</li>
+		<li data-action="load2">Load From File</li>
+		<li data-action="clear">Reset All</li>
+	</ul>
+	
+	<input type="file" class="file-select input" id="input-file-select" name="input-select[]" accept="application/json" />
+
 	<script>
 		var lines = [];
 		var process = true;
@@ -85,6 +104,10 @@
 			window.location.reload();
 		}
 
+		function update() {
+			editor.view.update();
+		}
+
 
 		editor.eventListener.on('add', ()=> {
 			var position = editor.active.line.points.indexOf(editor.active.point);
@@ -110,6 +133,7 @@
 				editor.addPoint(new D3CE.CurvePoint(x,y), newPosition);
 				editor.active.line = activeLine;
 				editor.active.point = activePoint;
+				update();
 			}
 
 			if(editor.active.line.name == "leftlens" && process) {
@@ -125,6 +149,7 @@
 						editor.addPoint(new D3CE.CurvePoint(x,y), editor.active.line.points.length - position);
 						editor.active.line = activeLine;
 						editor.active.point = activePoint;
+						update();
 					}
 				}			
 			}
@@ -142,6 +167,7 @@
 						editor.addPoint(new D3CE.CurvePoint(x,y), editor.active.line.points.length - position);
 						editor.active.line = activeLine;
 						editor.active.point = activePoint;
+						update();
 					}
 				}
 			}
@@ -162,6 +188,7 @@
 						editor.addPoint(new D3CE.CurvePoint(x,y), editor.active.line.points.length - position);
 						editor.active.line = activeLine;
 						editor.active.point = activePoint;
+						update();
 					}
 				}			
 			}
@@ -179,6 +206,7 @@
 						editor.addPoint(new D3CE.CurvePoint(x,y), editor.active.line.points.length - position);
 						editor.active.line = activeLine;
 						editor.active.point = activePoint;
+						update();
 					}
 				}
 			}
@@ -186,7 +214,7 @@
 				processHandle = true;
 			}
 
-			editor.view.update();
+			update();
 		})
 
 
@@ -204,6 +232,7 @@
 
 				editor.removePoint(editor.active.line.points[removePosition]);
 				editor.active.line = activeLine;
+				update();
 				//editor.active.point = activePoint;
 			}
 
@@ -219,6 +248,7 @@
 						editor.active.line = lines[i];
 						editor.removePoint(editor.active.line.points[removePosition]);
 						editor.active.line = activeLine;
+						update();
 						//editor.active.point = activePoint;
 					}
 				}			
@@ -236,6 +266,7 @@
 						editor.active.line = lines[j];
 						editor.removePoint(editor.active.line.points[removePosition]);
 						editor.active.line = activeLine;
+						update();
 						//editor.active.point = activePoint;
 					}
 				}
@@ -256,6 +287,7 @@
 						editor.active.line = lines[i];
 						editor.removePoint(editor.active.line.points[removePosition]);
 						editor.active.line = activeLine;
+						update();
 						//editor.active.point = activePoint;
 					}
 				}			
@@ -273,6 +305,7 @@
 						editor.active.line = lines[j];
 						editor.removePoint(editor.active.line.points[removePosition]);
 						editor.active.line = activeLine;
+						update();
 						//editor.active.point = activePoint;
 					}
 				}
@@ -281,7 +314,7 @@
 				processHandle = true;
 			}
 
-			editor.view.update();
+			update();
 		})
 
 
@@ -308,7 +341,8 @@
 				}
 
 				editor.view.setCoordinate(editor.active.line.points[secondPosition], 0, x);
-            			editor.view.setCoordinate(editor.active.line.points[secondPosition], 1, y);
+				editor.view.setCoordinate(editor.active.line.points[secondPosition], 1, y);
+				update();
 			}
 
 			if(editor.active.line.name == "leftlens" && process) {
@@ -326,6 +360,7 @@
             					editor.view.setCoordinate(editor.active.line.points[secondPosition], 1, y);
 						editor.active.line = activeLine;
 						editor.active.point = activePoint;
+						update();
 					}
 				}			
 			}
@@ -345,6 +380,7 @@
             					editor.view.setCoordinate(editor.active.line.points[secondPosition], 1, y);
 						editor.active.line = activeLine;
 						editor.active.point = activePoint;
+						update();
 					}
 				}
 			}
@@ -367,6 +403,7 @@
             					editor.view.setCoordinate(editor.active.line.points[secondPosition], 1, y);
 						editor.active.line = activeLine;
 						editor.active.point = activePoint;
+						update();
 					}
 				}
 			}
@@ -386,6 +423,7 @@
             					editor.view.setCoordinate(editor.active.line.points[secondPosition], 1, y);
 						editor.active.line = activeLine;
 						editor.active.point = activePoint;
+						update();
 					}
 				}
 			}
@@ -393,12 +431,110 @@
 				processHandle = true;
 			}
 
-			editor.view.update();
+			update();
 		})
 
 
 		console.log("Lines");
 		console.log(lines);
+
+		//Right mouse click start
+		$("#editor").bind("contextmenu", function(event) {
+
+		// Avoid the real one
+		event.preventDefault();
+
+		// Show contextmenu
+		$("#container-menu").finish().toggle(50).css({
+		top: event.pageY + "px",
+		left: event.pageX + "px"
+		});
+		});
+
+		// If the document is clicked somewhere
+		$(document).bind("click", function(e) {
+				console.log($(e.target).parents(".custom-menu").length);
+			// If the clicked element is not the menu
+			if (!$(e.target).parents(".custom-menu").length > 0) {
+			// Hide it
+			$(".custom-menu").hide(50);
+			}
+		});
+
+
+		// If the menu element is clicked
+		$("#container-menu li").click(function() {
+		// This is the triggered action name
+		switch ($(this).attr("data-action")) {
+
+		// A case for each action. Your actions here
+		case "save1":
+			localStorage.setItem('savedFrame', JSON.stringify(lines));
+			//localStorage.setItem('savedFrame',lines);
+			break;
+		case "load1":
+			var retrievedLines = JSON.parse(localStorage.getItem('savedFrame'));
+			//console.log(retrievedLines[1].points.length);
+			var lines2 = [5];
+			for(var i=0; i<5; i++) {
+				for(var j=0; j<retrievedLines[i].points.length; j++) {
+					lines2[i].push(new D3CE.Line("#47a",[
+					new D3CE.CurvePoint(retrievedLines[i].points[j].x,retrievedLines[i].points[j].y).isFixed(retrievedLines[i].points[j].fixed)
+				],100,retrievedLines[i].name));
+				}
+			}
+			console.log(lines2);
+			//var container = document.getElementById("editor");
+			//editor = null;
+			//editor = new D3CE.CurveEditor(container,lines,{curve: d3.curveCatmullRom});
+			update();
+			break;
+		case "save2":
+			
+			break;
+		case "load2":
+			$(".file-select").trigger("click");
+			break;
+		case "clear":
+			reset();
+			break;
+		}
+
+		// Hide it AFTER the action was triggered
+		$(".custom-menu").hide(100);
+		});
+		//Right mouse click end
+
 	</script>
+
+	<style>
+		.custom-menu {
+		display: none;
+		z-index: 10000;
+		position: absolute;
+		overflow: hidden;
+		border: 1px solid #CCC;
+		white-space: nowrap;
+		font-family: sans-serif;
+		background: #FFF;
+		color: #333;
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		}
+
+		.custom-menu li {
+		padding: 8px 12px;
+		cursor: pointer;
+		}
+
+		.custom-menu li:hover {
+		background-color: #DEF;
+		}
+
+		input {
+		display: none;
+		}
+	</style>
 </body>
 </html>

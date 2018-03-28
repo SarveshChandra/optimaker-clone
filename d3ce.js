@@ -304,7 +304,8 @@ var EditorView = function () {
         key: 'addPoint',
         value: function addPoint() {
             if (!this.editor.active.line) {
-                alert('Select the required line for adding points');
+                //changed
+                //alert('Select the required line for adding points');
                 return;
             }
 
@@ -320,7 +321,8 @@ var EditorView = function () {
             var rangeY = range[this.axis(1)];
 
             if (!rangeX.contains(this.getCoordinate(point, 0)) || !rangeY.contains(this.getCoordinate(point, 1))) {
-                alert('Out of range');
+                //changed
+                //alert('Out of range');
                 return;
             }
 
