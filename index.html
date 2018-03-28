@@ -4,6 +4,8 @@
 	<!--<script src="https://cdn.jsdelivr.net/npm/d3-curve-editor@0.2.0/build/d3-curve-editor.min.js"></script>-->
 	<script src="d3ce.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	<script src="http://requirejs.org/docs/release/2.2.0/minified/require.js"></script>
+	<script src="file-system.js"></script>
 	<link  href="https://cdn.jsdelivr.net/npm/d3-curve-editor@0.2.0/build/d3-curve-editor.css" rel="stylesheet" type="text/css"></link>
 	<style>
 		html,body{
@@ -11,9 +13,9 @@
 		  margin: 0;
 		  padding: 0;
 		}
-		#editor{
-		  width: 100%;
-		  height: 100%;
+		#editor {
+			width: 100%;
+			height: 100%;
 		}
 		.curve-editor .point.fixed {
 			stroke-width: 0px;
@@ -35,15 +37,19 @@
 <body>
 	<svg tabindex="1" id="editor"></svg>
 	<div style="text-align: center; margin-top: -100px;">
-		<a onclick="reset()" href="" style="border:1px solid #00b0ff; padding: 10px 20px; color: #00b0ff">Reset</a>
+		<a onclick="save()" style="border:1px solid #00b0ff; padding: 10px 20px; color: royalblue">Save</a>
+		<a onclick="load()" style="border:1px solid #00b0ff; padding: 10px 20px; color: royalblue">Load</a>
+		<a onclick="reset()" style="border:1px solid #00b0ff; padding: 10px 20px; color: red">Reset</a>
+		<a onclick="saveFile()" style="border:1px solid #00b0ff; padding: 10px 20px; color: royalblue">Save As File</a>
+		<a onclick="loadFile()" style="border:1px solid #00b0ff; padding: 10px 20px; color: royalblue">Load From File</a>
 	</div>
 	
 	<ul class='custom-menu' id="container-menu">
-		<li data-action="save1">Save In Browser</li>
-		<li data-action="load1">Load from Browser</li>
+		<li data-action="save1">Save</li>
+		<li data-action="load1">Load</li>
 		<li data-action="save2">Save As File</li>
 		<li data-action="load2">Load From File</li>
-		<li data-action="clear">Reset All</li>
+		<li data-action="clear" style="color:red">Reset All</li>
 	</ul>
 	
 	<input type="file" class="file-select input" id="input-file-select" name="input-select[]" accept="application/json" />
@@ -106,6 +112,54 @@
 
 		function update() {
 			editor.view.update();
+		}
+
+		function save() {
+			localStorage.setItem('savedFrame', JSON.stringify(lines));
+		}
+
+		function load() {
+			var retrievedLines = JSON.parse(localStorage.getItem('savedFrame'));
+			var lines2 = [];
+			for(var i=0; i<5; i++) {
+				lines2.push(new D3CE.Line("#47a",[
+					new D3CE.CurvePoint(retrievedLines[i].points[0].x,retrievedLines[i].points[0].y).isFixed(retrievedLines[i].points[0].fixed),
+					new D3CE.CurvePoint(retrievedLines[i].points[1].x,retrievedLines[i].points[1].y).isFixed(retrievedLines[i].points[1].fixed)
+				],100,retrievedLines[i].name));
+			}
+			for(var j=0; j<5; j++) {
+				for(var k=2; k<retrievedLines[j].points.length; k++) {
+					lines2[j].points.push(new D3CE.CurvePoint(retrievedLines[j].points[k].x,retrievedLines[j].points[k].y).isFixed(retrievedLines[j].points[k].fixed));
+				}
+			}
+			console.log(editor);
+			lines = lines2;
+			editor.lines = lines2;
+			update();
+		}
+
+		function saveFile() {
+			var fs = require(["fs"]);
+			var sampleObject = {
+			a: 1,
+			b: 2,
+			c: {
+				x: 11,
+				y: 22
+			}
+			};
+
+			fs.writeFile("./object.json", JSON.stringify(lines), (err) => {
+			if (err) {
+				console.error(err);
+				return;
+			};
+			console.log("File has been created");
+			});
+		}
+
+		function loadFile() {
+			$(".file-select").trigger("click");
 		}
 
 
@@ -469,31 +523,16 @@
 
 		// A case for each action. Your actions here
 		case "save1":
-			localStorage.setItem('savedFrame', JSON.stringify(lines));
-			//localStorage.setItem('savedFrame',lines);
+			save();
 			break;
 		case "load1":
-			var retrievedLines = JSON.parse(localStorage.getItem('savedFrame'));
-			//console.log(retrievedLines[1].points.length);
-			var lines2 = [5];
-			for(var i=0; i<5; i++) {
-				for(var j=0; j<retrievedLines[i].points.length; j++) {
-					lines2[i].push(new D3CE.Line("#47a",[
-					new D3CE.CurvePoint(retrievedLines[i].points[j].x,retrievedLines[i].points[j].y).isFixed(retrievedLines[i].points[j].fixed)
-				],100,retrievedLines[i].name));
-				}
-			}
-			console.log(lines2);
-			//var container = document.getElementById("editor");
-			//editor = null;
-			//editor = new D3CE.CurveEditor(container,lines,{curve: d3.curveCatmullRom});
-			update();
+			load();
 			break;
 		case "save2":
-			
+			saveFile();
 			break;
 		case "load2":
-			$(".file-select").trigger("click");
+			loadFile();
 			break;
 		case "clear":
 			reset();
